@@ -3,9 +3,11 @@
 // Some of the codes are from https://github.com/sl1673495/vue-netease-music
 
 // import { mapState, mapMutations, mapActions } from 'vuex';
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, onUnmounted, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
-import VueSlider from 'vue-slider-component'
+
+// import 'time'
+// import VueSlider from 'vue-slider-component'
 import Color from 'color'
 import * as Vibrant from 'node-vibrant/dist/vibrant.worker.min.js'
 import useStore from '../stores/store.js'
@@ -27,6 +29,7 @@ const highlightLyricIndex = ref(-1)
 const minimize = ref(true)
 const background = ref('')
 const date = ref(formatTime(new Date()))
+const timer = ref(null)
 
 const store = useStore()
 const { player, settings, showLyrics } = storeToRefs(useStore())
@@ -155,11 +158,11 @@ onMounted(() => {
   getCoverColor()
   initDate()
 })
-beforeUnmount(() => {
+onBeforeUnmount(() => {
   if (timer.value)
     clearInterval(timer.value)
 })
-unmounted(() => {
+onUnmounted(() => {
   clearInterval(lyricsInterval.value)
 })
 // beforeDestroy: function () {
@@ -181,6 +184,7 @@ function initDate() {
   clearInterval(timer.value)
   timer.value = setInterval(() => {
     date.value = formatTime(new Date())
+    // console.log(date.value)
   }, 1000)
 }
 function formatTime(value) {
@@ -355,7 +359,9 @@ function mute() {
 
 <template>
   <span>lyrics</span>
-  <transition name="slide-up">
+  <h1>{{ timer }}</h1>
+  <h1>{{ date }}</h1>
+  <transition name="slide-up" v-show="false">
     <div class="lyrics-page" :class="{ 'no-lyric': noLyric }" :data-theme="theme">
       <div 
         v-if="(settings.lyricsBackground === 'blur')
@@ -389,12 +395,12 @@ function mute() {
             <div class="top-part">
               <div class="track-info">
                 <div class="title" :title="currentTrack.name">
-                  <router-link v-if="hasList()" :to="`${getListPath()}`" @click="toggleLyrics">{{ currentTrack.name
+                  <!-- <router-link v-if="hasList()" :to="`${getListPath()}`" @click="toggleLyrics">{{ currentTrack.name
                   }}
-                  </router-link>
-                  <span v-else>
+                  </router-link> -->
+                  <!-- <span v-else>
                     {{ currentTrack.name }}
-                  </span>
+                  </span> -->
                 </div>
                 <div class="subtitle">
                   <router-link v-if="artist.id !== 0" :to="`/artist/${artist.id}`" @click="toggleLyrics">{{
@@ -437,9 +443,10 @@ function mute() {
                   <ButtonIcon :title="$t('contextMenu.addToPlaylist')" @click="addToPlaylist">
                     <svg-icon icon-class="plus" />
                   </ButtonIcon>
-                  <ButtonIcon @click="openMenu" title="Menu">
+                  TODO: open menu
+                  <!-- <ButtonIcon @click="openMenu" title="Menu">
                     <svg-icon icon-class="more" />
-                  </ButtonIcon>
+                  </ButtonIcon> -->
                 </div>
               </div>
             </div>
@@ -525,7 +532,7 @@ function mute() {
   </transition>
 </template>
 
-<style lang="scss" scoped>
+<!-- <style lang="scss" scoped>
 .lyrics-page {
   position: fixed;
   top: 0;
@@ -941,4 +948,4 @@ function mute() {
   transform: translateX(27vh);
   opacity: 0;
 }
-</style>
+</style> -->
